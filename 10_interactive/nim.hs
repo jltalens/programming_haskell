@@ -69,3 +69,11 @@ play board player =
           num <- getDigit "Stars to remove: "
           if valid board row num then
              play (move board row num) (next player)
+          else
+             do newline
+                putStrLn "ERROR: Invalid move"
+                play board player
+
+
+nim :: IO ()
+nim = play initial 1
