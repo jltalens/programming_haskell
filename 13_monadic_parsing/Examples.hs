@@ -155,6 +155,11 @@ nats = do _ <- symbol "["
           _ <- symbol "]"
           return (n:ns)
 
+comment :: Parser ()
+comment = do _ <- string "--"
+             _ <- many (sat (/= '\n'))
+             return ()
+
 -- Arithmetic expressions
 expr :: Parser Int
 expr = do t <- term
