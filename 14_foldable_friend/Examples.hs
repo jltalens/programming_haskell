@@ -136,3 +136,40 @@ tree = Node (Node (Leaf 1) (Leaf 2)) (Leaf 3)
 
 -- foldr (+) 0 tree = 1 + (2 + (3 + 0)
 -- foldl (+) 0 tree = ((0 + 1) + 2) + 3
+
+
+
+{--
+ Traversables; generalising the idea of applying a functor over a list
+--}
+
+traverse'' :: (a -> Maybe b) -> [a] -> Maybe [b]
+traverse'' _ [] = pure []
+traverse'' g (x:xs) = pure (:) <*> g x <*> traverse' g xs
+
+dec :: Int -> Maybe Int
+dec n = if n > 0 then Just (n-1) else Nothing
+
+{--
+Built-in class definition
+The requirement of t being a functor is to generalise the idea of mapping and to support the fmap operation
+The requirement of t being a foldable is to ensure that values can be also folded up if desired
+--}
+class (Functor t, Foldable' t) => Traversable' t where
+  traverse' :: Applicative f => (a -> f b) -> t a -> f (t b)
+
+instance Traversable' [] where
+  -- traverse :: (a -> f b) -> [a] -> f [b]
+  traverse' _ [] = pure []
+  traverse' g (x:xs) = pure (:) <*> g x <*> traverse' g xs
+
+
+instance Functor Tree where
+  -- fmap :: (a -> b) -> Tree a -> Tree b
+  fmap f (Leaf x) = Leaf (f x)
+  fmap f (Node l r) = Node (fmap f l) (fmap f r)
+
+instance Traversable' Tree where
+  -- traverse :: Applicative f => (a -> f b) -> Tree a -> f (Tree b)
+  traverse' g (Leaf x) = pure Leaf <*> g x
+  traverse' g (Node l r) = pure Node <*> traverse' g l <*> traverse' g r
